@@ -1,0 +1,39 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Project {
+  id          Int     @id @default(autoincrement())
+  title       String
+  description String?
+  images      Image[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Image {
+  id          Int      @id @default(autoincrement())
+  url         String
+  title       String?
+  description String?
+  position    Int?     // Nytt felt for å lagre rekkefølge
+  projectId   Int?
+  project     Project? @relation(fields: [projectId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Message {
+  id        Int      @id @default(autoincrement())
+  fullname  String
+  email     String
+  phone     String?
+  wish      String
+  createdAt DateTime @default(now())
+}
+
