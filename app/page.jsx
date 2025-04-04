@@ -1,3 +1,4 @@
+// app/page.jsx
 import React from "react";
 import HomeHerobanner from "./components/sections/HomeHerobanner";
 import HomeAboutMe from "./components/sections/HomeAboutMe";
@@ -9,9 +10,9 @@ const Home = () => {
         <div>
             <HomeHerobanner />
             <HomeAboutMe />
-            <Socials />
+            <Socials id="kontakt" />
             <div className="mt-32"></div>
-            <SkreddersyddMaleriForm />
+            <SkreddersyddMaleriForm id="onskeskjema" />
         </div>
     );
 };

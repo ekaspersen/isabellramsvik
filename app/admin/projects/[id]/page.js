@@ -1,198 +1,169 @@
 // app/admin/projects/[id]/page.js
 "use client";
 import { useState, useEffect } from "react";
-import { useRouter, useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
+import Image from "next/image";
+import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
+import { SpinningLoader } from "@/app/components/SpinningLoader";
 
 export default function EditProject() {
-    const router = useRouter();
     const { id } = useParams();
+    const router = useRouter();
+    const [project, setProject] = useState(null);
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
     const [images, setImages] = useState([]);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        if (id) {
-            fetch(`/api/projects/${id}`)
-                .then((res) => res.json())
-                .then((data) => {
-                    setTitle(data.title);
-                    setDescription(data.description);
-                    const sortedImages = data.images.sort(
-                        (a, b) => (a.position || a.id) - (b.position || b.id)
-                    );
-                    setImages(sortedImages);
-                })
-                .catch((err) => console.error(err));
-        }
+        fetch(`/api/projects/${id}`)
+            .then((res) => res.json())
+            .then((data) => {
+                if (data.success) {
+                    setProject(data.data);
+                    setTitle(data.data.title);
+                    setDescription(data.data.description);
+                    setImages(data.data.images || []);
+                }
+                setLoading(false);
+            })
+            .catch((err) => {
+                console.error("Failed to fetch project:", err);
+                setLoading(false);
+            });
     }, [id]);
 
-    const moveImageUp = (index) => {
-        if (index === 0) return;
-        const newImages = [...images];
-        [newImages[index - 1], newImages[index]] = [
-            newImages[index],
-            newImages[index - 1],
-        ];
-        setImages(newImages);
+    const handleDragEnd = (result) => {
+        if (!result.destination) return;
+        const reorderedImages = Array.from(images);
+        const [movedImage] = reorderedImages.splice(result.source.index, 1);
+        reorderedImages.splice(result.destination.index, 0, movedImage);
+        setImages(reorderedImages);
     };
 
-    const moveImageDown = (index) => {
-        if (index === images.length - 1) return;
-        const newImages = [...images];
-        [newImages[index], newImages[index + 1]] = [
-            newImages[index + 1],
-            newImages[index],
-        ];
-        setImages(newImages);
-    };
-
-    const handleImageChange = (index, field, value) => {
-        const newImages = [...images];
-        newImages[index][field] = value;
-        setImages(newImages);
-    };
-
-    const handleUpdate = async (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        const updatedImages = images.map((img, idx) => ({
-            id: img.id,
-            title: img.title,
-            description: img.description,
-            position: idx + 1,
+        setLoading(true);
+        const updatedImages = images.map((img, index) => ({
+            ...img,
+            position: index,
         }));
         const res = await fetch(`/api/projects/${id}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ title, description, images: updatedImages }),
         });
-        if (res.ok) {
+        const data = await res.json();
+        if (data.success) {
             router.push("/admin/projects");
         } else {
-            console.error("Update failed");
+            alert("Failed to update project: " + data.error.message);
         }
+        setLoading(false);
     };
 
-    const handleDelete = async () => {
-        if (confirm("Are you sure you want to delete this project?")) {
-            const res = await fetch(`/api/projects/${id}`, {
+    const handleImageDelete = async (imageId) => {
+        if (confirm("Delete this image?")) {
+            const res = await fetch(`/api/images/${imageId}`, {
                 method: "DELETE",
             });
-            if (res.ok) {
-                router.push("/admin/projects");
+            const data = await res.json();
+            if (data.success) {
+                setImages(images.filter((img) => img.id !== imageId));
             } else {
-                console.error("Delete failed");
+                alert("Failed to delete image: " + data.error.message);
             }
         }
     };
 
+    if (loading) {
+        return (
+            <div className="h-screen grid place-items-center">
+                <SpinningLoader />
+            </div>
+        );
+    }
+
     return (
-        <div className="max-w-3xl mx-auto p-6">
-            <h2 className="text-3xl font-bold text-center mb-6">
-                Rediger Prosjekt
-            </h2>
-            <form onSubmit={handleUpdate} className="space-y-6">
-                <div>
-                    <label className="block text-lg font-medium">Tittel:</label>
+        <div className="flex flex-col gap-8">
+            <h1 className="text-4xl md:text-5xl font-extralight">
+                Edit Project
+            </h1>
+            <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+                <div className="flex flex-col gap-2">
+                    <label className="text-sm">Title</label>
                     <input
                         type="text"
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
+                        className="bg-primary-dark border-2 border-primary-light rounded p-2 text-white"
                         required
-                        className="mt-1 block w-full rounded-md border border-gray-300 p-2"
                     />
                 </div>
-                <div>
-                    <label className="block text-lg font-medium">
-                        Beskrivelse:
-                    </label>
+                <div className="flex flex-col gap-2">
+                    <label className="text-sm">Description</label>
                     <textarea
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
-                        className="mt-1 block w-full rounded-md border border-gray-300 p-2"
+                        className="bg-primary-dark border-2 border-primary-light rounded p-2 text-white h-32"
                     />
                 </div>
 
-                <div>
-                    <h3 className="text-xl font-bold mb-2">Bilder</h3>
-                    {images.map((img, index) => (
-                        <div
-                            key={img.id}
-                            className="border border-primary-light bg-black rounded-md p-4 mb-4"
-                        >
-                            <div className="flex flex-col md:flex-row md:items-center md:space-x-4">
-                                <img
-                                    src={img.url}
-                                    alt={img.title || "Project Image"}
-                                    className="w-full md:w-48 h-32 object-cover rounded mb-4 md:mb-0"
-                                />
-                                <div className="flex-1">
-                                    <div className="mb-2">
-                                        <label className="block text-sm font-medium">
-                                            Bilde Tittel:
-                                        </label>
-                                        <input
-                                            type="text"
-                                            value={img.title}
-                                            onChange={(e) =>
-                                                handleImageChange(
-                                                    index,
-                                                    "title",
-                                                    e.target.value
-                                                )
-                                            }
-                                            className="mt-1 block w-full rounded-md border border-gray-300 p-2"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-medium">
-                                            Bilde Beskrivelse:
-                                        </label>
-                                        <textarea
-                                            value={img.description}
-                                            onChange={(e) =>
-                                                handleImageChange(
-                                                    index,
-                                                    "description",
-                                                    e.target.value
-                                                )
-                                            }
-                                            className="mt-1 block w-full rounded-md border border-gray-300 p-2"
-                                        />
-                                    </div>
-                                </div>
-                                <div className="flex flex-col items-center space-y-2 mt-4 md:mt-0">
-                                    <button
-                                        type="button"
-                                        onClick={() => moveImageUp(index)}
-                                        className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded"
+                <DragDropContext onDragEnd={handleDragEnd}>
+                    <Droppable droppableId="images">
+                        {(provided) => (
+                            <div
+                                {...provided.droppableProps}
+                                ref={provided.innerRef}
+                                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
+                            >
+                                {images.map((image, index) => (
+                                    <Draggable
+                                        key={image.id}
+                                        draggableId={image.id.toString()}
+                                        index={index}
                                     >
-                                        ↑
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => moveImageDown(index)}
-                                        className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded"
-                                    >
-                                        ↓
-                                    </button>
-                                </div>
+                                        {(provided) => (
+                                            <div
+                                                ref={provided.innerRef}
+                                                {...provided.draggableProps}
+                                                {...provided.dragHandleProps}
+                                                className="bg-primary-dark p-4 rounded-lg border-2 border-primary-light flex flex-col gap-2"
+                                            >
+                                                <Image
+                                                    src={image.url}
+                                                    alt={image.title || "Image"}
+                                                    width={200}
+                                                    height={100}
+                                                    className="w-full h-24 object-cover rounded"
+                                                />
+                                                <p className="text-sm">
+                                                    {image.title || "No Title"}
+                                                </p>
+                                                <button
+                                                    type="button"
+                                                    onClick={() =>
+                                                        handleImageDelete(
+                                                            image.id
+                                                        )
+                                                    }
+                                                    className="btn-inverted mt-auto"
+                                                >
+                                                    Delete
+                                                </button>
+                                            </div>
+                                        )}
+                                    </Draggable>
+                                ))}
+                                {provided.placeholder}
                             </div>
-                        </div>
-                    ))}
-                </div>
+                        )}
+                    </Droppable>
+                </DragDropContext>
 
-                <div className="flex justify-center gap-4">
-                    <button type="submit" className="btn-golden">
-                        Oppdater
-                    </button>
-                    <button
-                        type="button"
-                        onClick={handleDelete}
-                        className="px-6 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
-                    >
-                        Slett Prosjekt
-                    </button>
-                </div>
+                <button type="submit" className="btn-golden mt-4">
+                    Save Changes
+                </button>
             </form>
         </div>
     );

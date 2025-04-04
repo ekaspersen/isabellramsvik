@@ -1,46 +1,9 @@
+// app/galleri/page.jsx
 "use client";
 import { ProjectScroller } from "./components/ProjectScroller";
 import Socials from "../components/Socials";
 import SkreddersyddMaleriForm from "../components/sections/Skreddersyddmaleriform";
 import { ResponsiveImageGrid } from "./components/ResponsiveImageGrid";
-
-const allImages = [
-    "/mountainsithink.jpeg",
-    "/homeaboutmepicture.png",
-    "/mountainsithink.jpeg",
-    "/isabellpainting.jpg",
-    "/heropicture.png",
-    "/mountainsithink.jpeg",
-    "/homeaboutmepicture.png",
-    "/mountainsithink.jpeg",
-    "/isabellpainting.jpg",
-    "/heropicture.png",
-    "/mountainsithink.jpeg",
-    "/homeaboutmepicture.png",
-    "/mountainsithink.jpeg",
-    "/isabellpainting.jpg",
-    "/mountainsithink.jpeg",
-    "/isabellpainting.jpg",
-    "/heropicture.png",
-    "/mountainsithink.jpeg",
-    "/homeaboutmepicture.png",
-    "/mountainsithink.jpeg",
-    "/isabellpainting.jpg",
-    "/mountainsithink.jpeg",
-    "/isabellpainting.jpg",
-    "/heropicture.png",
-    "/mountainsithink.jpeg",
-    "/homeaboutmepicture.png",
-    "/mountainsithink.jpeg",
-    "/isabellpainting.jpg",
-    "/mountainsithink.jpeg",
-    "/isabellpainting.jpg",
-    "/heropicture.png",
-    "/mountainsithink.jpeg",
-    "/homeaboutmepicture.png",
-    "/mountainsithink.jpeg",
-    "/isabellpainting.jpg",
-];
 
 export default function Galleri() {
     return (

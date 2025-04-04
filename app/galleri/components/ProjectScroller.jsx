@@ -1,6 +1,8 @@
+// app/galleri/components/ProjectScroller.jsx
 "use client";
 import { useRef, useState, useEffect } from "react";
 import Image from "next/image";
+import Link from "next/link";
 
 export const ProjectScroller = () => {
     const containerRef = useRef(null);
@@ -10,8 +12,21 @@ export const ProjectScroller = () => {
     useEffect(() => {
         fetch("/api/projects")
             .then((res) => res.json())
-            .then((data) => setProjects(data))
-            .catch((err) => console.error(err));
+            .then((data) => {
+                if (Array.isArray(data)) {
+                    setProjects(data);
+                } else {
+                    console.error(
+                        "Expected array from /api/projects, got:",
+                        data
+                    );
+                    setProjects([]);
+                }
+            })
+            .catch((err) => {
+                console.error("Failed to fetch projects:", err);
+                setProjects([]);
+            });
     }, []);
 
     useEffect(() => {
@@ -20,7 +35,8 @@ export const ProjectScroller = () => {
             if (!el) return;
             const scrollLeft = el.scrollLeft;
             const scrollWidth = el.scrollWidth - el.clientWidth;
-            const progress = (scrollLeft / scrollWidth) * 100;
+            const progress =
+                (scrollWidth > 0 ? scrollLeft / scrollWidth : 0) * 100;
             setScrollProgress(progress);
         };
         if (el) {
@@ -40,7 +56,7 @@ export const ProjectScroller = () => {
                         key={project.id}
                         className="flex-shrink-0 flex flex-col gap-2 max-w-[288px] lg:max-w-[540px]"
                     >
-                        {project.images.length > 0 && (
+                        {project.images && project.images.length > 0 ? (
                             <Image
                                 className="h-36 w-72 lg:w-[540px] lg:h-[270px] object-cover border-4 border-primary-light rounded-tr-4xl"
                                 src={project.images[0].url}
@@ -48,6 +64,10 @@ export const ProjectScroller = () => {
                                 width={288}
                                 height={144}
                             />
+                        ) : (
+                            <div className="h-36 w-72 lg:w-[540px] lg:h-[270px] bg-primary-dark border-4 border-primary-light rounded-tr-4xl flex items-center justify-center text-sm">
+                                No Gallery Images
+                            </div>
                         )}
                         <h3 className="text-2xl mt-2 sm:text-3xl font-extralight">
                             {project.title}
@@ -55,10 +75,17 @@ export const ProjectScroller = () => {
                         <p className="text-sm line-clamp-3 lg:max-w-5/6">
                             {project.description}
                         </p>
+                        <Link
+                            href={`/galleri/${project.id}`}
+                            className="max-w-fit mt-auto"
+                        >
+                            <div className="btn-golden max-w-fit">
+                                SE PROSJEKT
+                            </div>
+                        </Link>
                     </div>
                 ))}
             </div>
-
             <div className="w-full h-1 bg-white/10 rounded overflow-hidden mt-4">
                 <div
                     className="h-full bg-primary-light transition-all duration-100 ease-out"

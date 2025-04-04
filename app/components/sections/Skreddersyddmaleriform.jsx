@@ -1,4 +1,4 @@
-// components/SkreddersyddMaleriForm.jsx
+// app/components/SkreddersyddMaleriForm.jsx
 "use client";
 import { useState } from "react";
 

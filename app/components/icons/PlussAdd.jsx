@@ -1,3 +1,4 @@
+// app/components/icons/PlussAdd.jsx
 import React from "react";
 
 export default function PlussAdd() {

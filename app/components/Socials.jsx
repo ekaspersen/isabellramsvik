@@ -1,3 +1,4 @@
+// app/components/Socials.jsx
 import Image from "next/image";
 import React from "react";
 
