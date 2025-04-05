@@ -39,7 +39,7 @@ export default function Dashboard() {
             });
     }, []);
 
-    const hasNumbers = (text) => /\d/.test(text); // Check if string contains numbers
+    const hasNumbers = (text) => /\d/.test(text);
 
     if (loading) {
         return (

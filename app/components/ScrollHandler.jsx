@@ -1,3 +1,4 @@
+// app/components/ScrollHandler.jsx
 "use client";
 import { useEffect } from "react";
 import { usePathname, useSearchParams } from "next/navigation";

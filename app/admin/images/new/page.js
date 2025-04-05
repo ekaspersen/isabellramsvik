@@ -15,6 +15,7 @@ export default function NewImage() {
     const [projects, setProjects] = useState([]);
     const [loading, setLoading] = useState(false);
 
+    // Fetch projects for the dropdown
     useEffect(() => {
         fetch("/api/projects")
             .then((res) => res.json())
@@ -22,6 +23,7 @@ export default function NewImage() {
             .catch((err) => console.error("Failed to fetch projects:", err));
     }, []);
 
+    // Handle file selection and generate preview
     const handleFileChange = (e) => {
         const selectedFile = e.target.files[0];
         if (selectedFile) {
@@ -31,6 +33,7 @@ export default function NewImage() {
         }
     };
 
+    // Submit the form to upload the image
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!file) {
@@ -63,6 +66,7 @@ export default function NewImage() {
         }
     };
 
+    // Clean up preview URL to avoid memory leaks
     useEffect(() => {
         return () => {
             if (preview) URL.revokeObjectURL(preview);

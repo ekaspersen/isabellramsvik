@@ -1,3 +1,4 @@
+// app/api/messages/route.js
 import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import pino from "pino";
@@ -53,7 +54,7 @@ export async function POST(request) {
         const data = await request.json();
         const newMessage = await prisma.message.create({ data });
         logger.info(`Message created: ${newMessage.id}`);
-        Object.keys(cache).forEach((key) => delete cache[key]); // Invalidate cache
+        Object.keys(cache).forEach((key) => delete cache[key]);
         return NextResponse.json({ success: true, data: newMessage });
     } catch (error) {
         logger.error(`Message creation failed: ${error.message}`);

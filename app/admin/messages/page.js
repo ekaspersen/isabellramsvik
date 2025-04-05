@@ -1,3 +1,4 @@
+// app/admin/messages/page.js
 "use client";
 import { useState, useEffect } from "react";
 import { SpinningLoader } from "@/app/components/SpinningLoader";
@@ -33,28 +34,6 @@ export default function Messages() {
         }
     };
 
-    const toggleRead = async (id) => {
-        const message = messages.find((m) => m.id === id);
-        const updatedMessage = { ...message, read: !message.read };
-        setMessages(messages.map((m) => (m.id === id ? updatedMessage : m)));
-        await fetch("/api/messages", {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ id, read: updatedMessage.read }),
-        });
-    };
-
-    const toggleFavorite = async (id) => {
-        const message = messages.find((m) => m.id === id);
-        const updatedMessage = { ...message, favorite: !message.favorite };
-        setMessages(messages.map((m) => (m.id === id ? updatedMessage : m)));
-        await fetch("/api/messages", {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ id, favorite: updatedMessage.favorite }),
-        });
-    };
-
     const handleSort = (field) => {
         if (sortBy === field) {
             setSortOrder(sortOrder === "asc" ? "desc" : "asc");
@@ -79,7 +58,7 @@ export default function Messages() {
         return 0;
     });
 
-    const hasNumbers = (text) => /\d/.test(text); // Check if string contains numbers
+    const hasNumbers = (text) => /\d/.test(text);
 
     if (loading) {
         return (
@@ -154,10 +133,7 @@ export default function Messages() {
                                     {message.fullname}
                                 </h2>
                                 <div className="flex gap-2">
-                                    <button
-                                        onClick={() =>
-                                            toggleFavorite(message.id)
-                                        }
+                                    <span
                                         className={`text-2xl ${
                                             message.favorite
                                                 ? "text-yellow-400"
@@ -165,15 +141,7 @@ export default function Messages() {
                                         }`}
                                     >
                                         ★
-                                    </button>
-                                    <button
-                                        onClick={() => toggleRead(message.id)}
-                                        className="text-sm text-primary-light hover:text-white"
-                                    >
-                                        {message.read
-                                            ? "Mark Unread"
-                                            : "Mark Read"}
-                                    </button>
+                                    </span>
                                 </div>
                             </div>
                             <div className="flex flex-col gap-1">

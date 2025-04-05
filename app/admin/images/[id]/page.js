@@ -16,6 +16,7 @@ export default function EditImage() {
     const [projects, setProjects] = useState([]);
     const [loading, setLoading] = useState(true);
 
+    // Fetch image and projects data
     useEffect(() => {
         Promise.all([
             fetch(`/api/images/${id}`).then((res) => res.json()),
@@ -29,7 +30,7 @@ export default function EditImage() {
                     setProjectId(imageData.data.projectId || "");
                     setDisplayInGallery(
                         imageData.data.displayInGallery !== false
-                    ); // Default to true if undefined
+                    );
                 }
                 if (Array.isArray(projectsData)) {
                     setProjects(projectsData);
@@ -42,6 +43,7 @@ export default function EditImage() {
             });
     }, [id]);
 
+    // Submit updated image details
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -81,7 +83,7 @@ export default function EditImage() {
                     alt={image.title || "Image"}
                     width={400}
                     height={200}
-                    className="w-full max-w-fit max-h-fit md:w-1/2 h-64 md:h-96 object-contain  rounded border-2 border-primary-light"
+                    className="w-full max-w-fit max-h-fit md:w-1/2 h-64 md:h-96 object-contain rounded border-2 border-primary-light"
                 />
                 <form
                     onSubmit={handleSubmit}

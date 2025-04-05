@@ -51,26 +51,26 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
+model Image {
+  id              Int      @id @default(autoincrement())
+  url             String
+  cloudinaryId    String?  // Ensure this field is present
+  title           String?
+  description     String?
+  position        Int?
+  displayInGallery Boolean @default(true)
+  projectId       Int?
+  project         Project? @relation(fields: [projectId], references: [id])
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
 model Project {
   id          Int      @id @default(autoincrement())
   title       String
   description String?
   images      Image[]
   createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-}
-
-model Image {
-  id              Int      @id @default(autoincrement())
-  url             String
-  title           String?
-  description     String?
-  position        Int?
-  displayInGallery Boolean @default(true) // Moved here
-  projectId       Int?
-  project         Project? @relation(fields: [projectId], references: [id])
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
 }
 
 model Message {

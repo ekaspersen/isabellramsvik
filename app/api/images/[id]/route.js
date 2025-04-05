@@ -1,18 +1,23 @@
-import prisma from "@/lib/prisma";
+// app/api/images/[id]/route.js
+import { v2 as cloudinary } from "cloudinary";
 import { NextResponse } from "next/server";
-import pino from "pino";
-import { cache } from "@/lib/cache";
+import prisma from "@/lib/prisma";
 
-const logger = pino({ level: "info" });
+// Configure Cloudinary
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 export async function GET(request, { params }) {
-    const { id } = await params;
+    const { id } = params;
     try {
         const image = await prisma.image.findUnique({
             where: { id: parseInt(id) },
+            include: { project: { select: { title: true } } },
         });
         if (!image) {
-            logger.warn(`Image not found: ${id}`);
             return NextResponse.json(
                 {
                     success: false,
@@ -21,14 +26,13 @@ export async function GET(request, { params }) {
                 { status: 404 }
             );
         }
-        logger.info(`Fetched image: ${id}`);
         return NextResponse.json({ success: true, data: image });
     } catch (error) {
-        logger.error(`Failed to fetch image ${id}: ${error.message}`);
+        console.error("Error fetching image:", error);
         return NextResponse.json(
             {
                 success: false,
-                error: { message: error.message, code: "DATABASE_ERROR" },
+                error: { message: "Fetch failed", code: "DATABASE_ERROR" },
             },
             { status: 500 }
         );
@@ -36,28 +40,26 @@ export async function GET(request, { params }) {
 }
 
 export async function PUT(request, { params }) {
-    const { id } = await params;
+    const { id } = params;
     try {
-        const data = await request.json();
-        const { title, description, projectId, displayInGallery } = data;
-        const updatedImage = await prisma.image.update({
+        const { title, description, projectId, displayInGallery } =
+            await request.json();
+        const image = await prisma.image.update({
             where: { id: parseInt(id) },
             data: {
                 title,
                 description,
                 projectId: projectId ? parseInt(projectId) : null,
-                displayInGallery,
+                displayInGallery: displayInGallery ?? undefined, // Avoid overwriting with null unintentionally
             },
         });
-        logger.info(`Updated image: ${id}`);
-        Object.keys(cache).forEach((key) => delete cache[key]);
-        return NextResponse.json({ success: true, data: updatedImage });
+        return NextResponse.json({ success: true, data: image });
     } catch (error) {
-        logger.error(`Failed to update image ${id}: ${error.message}`);
+        console.error("Error updating image:", error);
         return NextResponse.json(
             {
                 success: false,
-                error: { message: error.message, code: "DATABASE_ERROR" },
+                error: { message: "Update failed", code: "DATABASE_ERROR" },
             },
             { status: 500 }
         );
@@ -65,18 +67,35 @@ export async function PUT(request, { params }) {
 }
 
 export async function DELETE(request, { params }) {
-    const { id } = await params;
+    const { id } = params;
     try {
+        const image = await prisma.image.findUnique({
+            where: { id: parseInt(id) },
+        });
+        if (!image) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    error: { message: "Image not found", code: "NOT_FOUND" },
+                },
+                { status: 404 }
+            );
+        }
+
+        if (image.cloudinaryId) {
+            await cloudinary.uploader.destroy(image.cloudinaryId, {
+                resource_type: "image",
+            });
+        }
+
         await prisma.image.delete({ where: { id: parseInt(id) } });
-        logger.info(`Deleted image: ${id}`);
-        Object.keys(cache).forEach((key) => delete cache[key]);
         return NextResponse.json({ success: true, message: "Image deleted" });
     } catch (error) {
-        logger.error(`Failed to delete image ${id}: ${error.message}`);
+        console.error("Error deleting image:", error);
         return NextResponse.json(
             {
                 success: false,
-                error: { message: error.message, code: "DATABASE_ERROR" },
+                error: { message: "Delete failed", code: "DATABASE_ERROR" },
             },
             { status: 500 }
         );

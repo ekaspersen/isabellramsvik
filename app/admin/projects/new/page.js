@@ -1,3 +1,4 @@
+// app/admin/projects/new/page.js
 "use client";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -72,7 +73,7 @@ export default function NewProject() {
             formData.append(`file_${index}`, img.file);
             formData.append(`title_${index}`, img.title);
             formData.append(`description_${index}`, img.description);
-            formData.append(`displayInGallery_${index}`, img.displayInGallery); // Per-image setting
+            formData.append(`displayInGallery_${index}`, img.displayInGallery);
         });
 
         try {
