@@ -52,7 +52,6 @@ function Header() {
                 >
                     <div className="h-1 w-full bg-primary-light rounded" />
                     <div className="h-1 w-full bg-primary-light rounded" />
-
                     <motion.div
                         className="h-1 bg-primary-light rounded"
                         animate={{

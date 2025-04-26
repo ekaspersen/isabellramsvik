@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion"; // Add AnimatePresence
+import { motion, AnimatePresence } from "framer-motion";
 import { SpinningLoader } from "@/app/components/SpinningLoader";
 
 export default function ImagePage() {
@@ -16,13 +16,15 @@ export default function ImagePage() {
 
     useEffect(() => {
         setLoading(true);
-        fetch(`/api/images/${id}`)
+        fetch(`/api/gallery/images/${id}`)
             .then((res) => res.json())
             .then((response) => {
                 if (response.success && response.data) {
                     setImage(response.data);
-                    if (response.data.projectId) {
-                        fetch(`/api/projects/${response.data.projectId}`)
+                    if (response.data.projectId !== 0) {
+                        fetch(
+                            `/api/gallery/projects/${response.data.projectId}`
+                        )
                             .then((res) => res.json())
                             .then((projResponse) => {
                                 if (projResponse.success && projResponse.data) {
@@ -39,14 +41,14 @@ export default function ImagePage() {
             })
             .catch((err) => console.error("Failed to fetch image:", err));
 
-        fetch("/api/images")
+        fetch("/api/gallery/images")
             .then((res) => res.json())
             .then((data) => {
-                if (Array.isArray(data)) {
-                    setAllImages(data);
+                if (data.success && Array.isArray(data.data)) {
+                    setAllImages(data.data);
                 } else {
                     console.error(
-                        "Expected array from /api/images, got:",
+                        "Expected array from /api/gallery/images, got:",
                         data
                     );
                     setAllImages([]);
@@ -95,7 +97,7 @@ export default function ImagePage() {
 
             <div className="inner flex flex-col gap-32 overflow-hidden">
                 <motion.div
-                    key={image.id} // Re-run animation when image changes
+                    key={image.id}
                     className="flex flex-col gap-8 items-center text-center lg:text-left"
                     initial={{ opacity: 0, y: 50 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -154,7 +156,7 @@ export default function ImagePage() {
 
                 {project && (
                     <motion.div
-                        key={project.id} // Re-run animation when project changes
+                        key={project.id}
                         className="flex flex-col gap-8 mt-[-64px] mx-auto items-center"
                         initial={{ opacity: 0, y: 50 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -192,7 +194,7 @@ export default function ImagePage() {
                                     {project.description}
                                 </p>
                                 <Link
-                                    href={`/galleri/${project.id}`}
+                                    href={`/galleri/projects/${project.id}`}
                                     className="max-w-fit"
                                 >
                                     <div className="btn-golden">

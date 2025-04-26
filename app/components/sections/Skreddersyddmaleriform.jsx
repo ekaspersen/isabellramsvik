@@ -1,6 +1,7 @@
-// app/components/SkreddersyddMaleriForm.jsx
 "use client";
 import { useState } from "react";
+import emailjs from "@emailjs/browser";
+import { SpinningLoader } from "../SpinningLoader";
 
 export default function SkreddersyddMaleriForm() {
     const [form, setForm] = useState({
@@ -11,6 +12,7 @@ export default function SkreddersyddMaleriForm() {
     });
     const [errors, setErrors] = useState({});
     const [success, setSuccess] = useState(null);
+    const [loading, setLoading] = useState(false);
 
     const validate = () => {
         const newErrors = {};
@@ -37,24 +39,38 @@ export default function SkreddersyddMaleriForm() {
             return;
         }
 
+        setLoading(true);
         try {
-            const res = await fetch("/api/messages", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(form),
-            });
-            if (res.ok) {
-                setSuccess("Takk for meldingen! Jeg kontakter deg snart.");
-                setForm({ fullname: "", phone: "", email: "", wish: "" });
-                setErrors({});
-            } else {
-                throw new Error();
-            }
-        } catch {
+            await emailjs.send(
+                process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID,
+                process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID,
+                {
+                    from_name: form.fullname,
+                    email: form.email,
+                    phone: form.phone || "Not provided",
+                    wish: form.wish,
+                },
+                process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY
+            );
+            setSuccess("Takk for meldingen! Jeg kontakter deg snart.");
+            setForm({ fullname: "", phone: "", email: "", wish: "" });
+            setErrors({});
+        } catch (error) {
+            console.error("Failed to send email:", error);
             setSuccess(null);
             alert("Noe gikk galt. Prøv igjen senere.");
+        } finally {
+            setLoading(false);
         }
     };
+
+    if (loading) {
+        return (
+            <div className="h-screen grid place-items-center">
+                <SpinningLoader />
+            </div>
+        );
+    }
 
     return (
         <section

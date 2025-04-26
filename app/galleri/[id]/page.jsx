@@ -1,10 +1,10 @@
-// app/galleri/images/[id]/page.jsx
+// app/galleri/[id]/page.jsx
 "use client";
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion"; // Add AnimatePresence
+import { motion, AnimatePresence } from "framer-motion";
 import { ProjectScroller } from "../components/ProjectScroller";
 import { SpinningLoader } from "@/app/components/SpinningLoader";
 
@@ -17,7 +17,7 @@ export default function ProjectPage() {
     useEffect(() => {
         if (id) {
             setLoading(true);
-            fetch(`/api/projects/${id}`)
+            fetch(`/api/gallery/projects/${id}`)
                 .then((res) => res.json())
                 .then((data) => {
                     if (data.success) {
@@ -65,7 +65,7 @@ export default function ProjectPage() {
                     </motion.div>
 
                     <motion.div
-                        key={project.id} // Re-run animation when project changes
+                        key={project.id}
                         className="flex flex-col lg:items-center gap-8 lg:flex-row lg:gap-12 items-center text-center lg:text-left"
                         initial={{ opacity: 0, y: 60 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -141,7 +141,7 @@ export default function ProjectPage() {
                         <AnimatePresence mode="wait">
                             {selectedImage ? (
                                 <motion.div
-                                    key={selectedImage.id} // Re-run animation on selectedImage change
+                                    key={selectedImage.id}
                                     className="flex flex-col gap-4 items-center text-center"
                                     initial={{ opacity: 0, x: -20 }}
                                     animate={{ opacity: 1, x: 0 }}
@@ -169,7 +169,7 @@ export default function ProjectPage() {
                                 </motion.div>
                             ) : (
                                 <motion.p
-                                    key="no-image" // Unique key for no-image state
+                                    key="no-image"
                                     className="text-sm text-primary-light italic"
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}

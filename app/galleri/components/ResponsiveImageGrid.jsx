@@ -3,17 +3,33 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { SpinningLoader } from "@/app/components/SpinningLoader";
 
 export const ResponsiveImageGrid = () => {
     const [images, setImages] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [imagesPerPage, setImagesPerPage] = useState(6);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        fetch("/api/images")
+        fetch("/api/gallery/images")
             .then((res) => res.json())
-            .then((data) => setImages(data))
-            .catch((err) => console.error("Failed to load images:", err));
+            .then((data) => {
+                if (data.success && Array.isArray(data.data)) {
+                    setImages(data.data);
+                } else {
+                    console.error(
+                        "Expected array from /api/gallery/images, got:",
+                        data
+                    );
+                    setImages([]);
+                }
+            })
+            .catch((err) => {
+                console.error("Failed to load images:", err);
+                setImages([]);
+            })
+            .finally(() => setLoading(false));
     }, []);
 
     useEffect(() => {
@@ -31,6 +47,14 @@ export const ResponsiveImageGrid = () => {
         window.addEventListener("resize", updateImagesPerPage);
         return () => window.removeEventListener("resize", updateImagesPerPage);
     }, []);
+
+    if (loading) {
+        return (
+            <div className="h-screen grid place-items-center">
+                <SpinningLoader />
+            </div>
+        );
+    }
 
     const totalPages = Math.ceil(images.length / imagesPerPage);
 
@@ -115,25 +139,33 @@ export const ResponsiveImageGrid = () => {
 
             {/* Grid with Overlay */}
             <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 gap-2 w-full p-2 bg-primary-light">
-                {visibleImages.map((image) => (
-                    <div
-                        key={image.id}
-                        className="w-full aspect-square relative group"
-                    >
-                        <Image
-                            src={image.url}
-                            alt={image.title || "Bilde"}
-                            className="object-cover w-full h-full"
-                            fill
-                            sizes="100vw"
-                        />
-                        <Link href={`/galleri/images/${image.id}`}>
-                            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                <button className="btn-golden">Se mer</button>
-                            </div>
-                        </Link>
+                {images.length > 0 ? (
+                    visibleImages.map((image) => (
+                        <div
+                            key={image.id}
+                            className="w-full aspect-square relative group"
+                        >
+                            <Image
+                                src={image.url}
+                                alt={image.title || "Bilde"}
+                                className="object-cover w-full h-full"
+                                fill
+                                sizes="100vw"
+                            />
+                            <Link href={`/galleri/images/${image.id}`}>
+                                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                    <button className="btn-golden">
+                                        Se mer
+                                    </button>
+                                </div>
+                            </Link>
+                        </div>
+                    ))
+                ) : (
+                    <div className="col-span-3 text-center text-primary-light">
+                        No images available
                     </div>
-                ))}
+                )}
             </div>
 
             {/* Desktop Pagination */}
