@@ -4,61 +4,54 @@ import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
-import { SpinningLoader } from "@/app/components/SpinningLoader";
+import { motion } from "framer-motion";
+import imagesData from "../../../api/gallery/data/images.json";
+import projectsData from "../../../api/gallery/data/projects.json";
 
 export default function ImagePage() {
     const { id } = useParams();
     const [image, setImage] = useState(null);
     const [allImages, setAllImages] = useState([]);
     const [project, setProject] = useState(null);
-    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     useEffect(() => {
-        setLoading(true);
-        fetch(`/api/gallery/images/${id}`)
-            .then((res) => res.json())
-            .then((response) => {
-                if (response.success && response.data) {
-                    setImage(response.data);
-                    if (response.data.projectId !== 0) {
-                        fetch(
-                            `/api/gallery/projects/${response.data.projectId}`
-                        )
-                            .then((res) => res.json())
-                            .then((projResponse) => {
-                                if (projResponse.success && projResponse.data) {
-                                    setProject(projResponse.data);
-                                }
-                            })
-                            .catch((err) =>
-                                console.error("Failed to fetch project:", err)
-                            );
-                    }
-                } else {
-                    console.error("Failed to fetch image:", response.error);
-                }
-            })
-            .catch((err) => console.error("Failed to fetch image:", err));
+        try {
+            const foundImage = imagesData.images.find(
+                (img) => img.id === parseInt(id)
+            );
+            if (!foundImage) {
+                throw new Error("Bilde ikke funnet");
+            }
+            setImage(foundImage);
 
-        fetch("/api/gallery/images")
-            .then((res) => res.json())
-            .then((data) => {
-                if (data.success && Array.isArray(data.data)) {
-                    setAllImages(data.data);
-                } else {
-                    console.error(
-                        "Expected array from /api/gallery/images, got:",
-                        data
-                    );
-                    setAllImages([]);
+            const galleryImages = imagesData.images.filter(
+                (img) => img.displayInGallery
+            );
+            setAllImages(galleryImages);
+
+            if (foundImage && foundImage.projectId !== 0) {
+                const foundProject = projectsData.projects.find(
+                    (proj) => proj.id === foundImage.projectId
+                );
+                if (foundProject) {
+                    const projectWithImages = {
+                        ...foundProject,
+                        images: foundProject.imageIds
+                            .map((imageId) =>
+                                imagesData.images.find(
+                                    (img) => img.id === imageId
+                                )
+                            )
+                            .filter(Boolean),
+                    };
+                    setProject(projectWithImages);
                 }
-            })
-            .catch((err) => {
-                console.error("Failed to fetch images:", err);
-                setAllImages([]);
-            })
-            .finally(() => setLoading(false));
+            }
+        } catch (err) {
+            console.error("Failed to process image data:", err);
+            setError(err.message || "Kunne ikke laste bilde.");
+        }
     }, [id]);
 
     const currentIndex = allImages.findIndex(
@@ -70,10 +63,18 @@ export default function ImagePage() {
             ? allImages[currentIndex + 1]
             : null;
 
-    if (loading || !image) {
+    if (error) {
         return (
             <div className="h-screen grid place-items-center bg-black pb-128">
-                <SpinningLoader />
+                <p className="text-primary-light">{error}</p>
+            </div>
+        );
+    }
+
+    if (!image) {
+        return (
+            <div className="h-screen grid place-items-center bg-black pb-128">
+                <p className="text-primary-light">Laster...</p>
             </div>
         );
     }
@@ -110,6 +111,12 @@ export default function ImagePage() {
                             width={1200}
                             height={600}
                             className="mx-auto lg:mx-0 w-full max-w-fit lg:w-1/2 max-h-[480px] object-contain rounded-lg border-4 border-primary-light"
+                            onError={(e) => {
+                                console.error(
+                                    `Failed to load image: ${image.url}`
+                                );
+                                e.target.src = "/images/fallback.jpg";
+                            }}
                         />
                         <motion.div
                             className="flex flex-col gap-4 md:gap-8"
@@ -178,6 +185,13 @@ export default function ImagePage() {
                                         width={288}
                                         height={144}
                                         className="max-w-fit max-h-fit h-56 object-contain rounded border-2 border-primary-light"
+                                        onError={(e) => {
+                                            console.error(
+                                                `Failed to load image: ${project.images[0].url}`
+                                            );
+                                            e.target.src =
+                                                "/images/fallback.jpg";
+                                        }}
                                     />
                                 </motion.div>
                             )}

@@ -3,33 +3,24 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { SpinningLoader } from "@/app/components/SpinningLoader";
+import imagesData from "../../api/gallery/data/images.json";
 
 export const ResponsiveImageGrid = () => {
     const [images, setImages] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [imagesPerPage, setImagesPerPage] = useState(6);
-    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     useEffect(() => {
-        fetch("/api/gallery/images")
-            .then((res) => res.json())
-            .then((data) => {
-                if (data.success && Array.isArray(data.data)) {
-                    setImages(data.data);
-                } else {
-                    console.error(
-                        "Expected array from /api/gallery/images, got:",
-                        data
-                    );
-                    setImages([]);
-                }
-            })
-            .catch((err) => {
-                console.error("Failed to load images:", err);
-                setImages([]);
-            })
-            .finally(() => setLoading(false));
+        try {
+            const galleryImages = imagesData.images.filter(
+                (img) => img.displayInGallery
+            );
+            setImages(galleryImages);
+        } catch (err) {
+            console.error("Failed to process images:", err);
+            setError("Kunne ikke laste bilder.");
+        }
     }, []);
 
     useEffect(() => {
@@ -48,10 +39,10 @@ export const ResponsiveImageGrid = () => {
         return () => window.removeEventListener("resize", updateImagesPerPage);
     }, []);
 
-    if (loading) {
+    if (error) {
         return (
-            <div className="h-screen grid place-items-center">
-                <SpinningLoader />
+            <div className="text-primary-light text-center p-4">
+                <p>{error}</p>
             </div>
         );
     }
@@ -150,7 +141,13 @@ export const ResponsiveImageGrid = () => {
                                 alt={image.title || "Bilde"}
                                 className="object-cover w-full h-full"
                                 fill
-                                sizes="100vw"
+                                sizes="(max-width: 480px) 100vw, (max-width: 640px) 50vw, 33vw"
+                                onError={(e) => {
+                                    console.error(
+                                        `Failed to load image: ${image.url}`
+                                    );
+                                    e.target.src = "/images/fallback.jpg";
+                                }}
                             />
                             <Link href={`/galleri/images/${image.id}`}>
                                 <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
@@ -163,7 +160,7 @@ export const ResponsiveImageGrid = () => {
                     ))
                 ) : (
                     <div className="col-span-3 text-center text-primary-light">
-                        No images available
+                        Ingen bilder tilgjengelig
                     </div>
                 )}
             </div>

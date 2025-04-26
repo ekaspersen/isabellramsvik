@@ -1,9 +1,10 @@
 // app/galleri/page.jsx
 "use client";
 import { ProjectScroller } from "./components/ProjectScroller";
+import { ResponsiveImageGrid } from "./components/ResponsiveImageGrid";
 import Socials from "../components/Socials";
 import SkreddersyddMaleriForm from "../components/sections/Skreddersyddmaleriform";
-import { ResponsiveImageGrid } from "./components/ResponsiveImageGrid";
+import { ErrorBoundary } from "../components/ErrorBoundary";
 
 export default function Galleri() {
     return (
@@ -31,7 +32,9 @@ export default function Galleri() {
                             om prosjektet...
                         </p>
                     </div>
-                    <ResponsiveImageGrid />
+                    <ErrorBoundary>
+                        <ResponsiveImageGrid />
+                    </ErrorBoundary>
                 </div>
 
                 <div className="flex flex-col gap-12">
@@ -46,7 +49,9 @@ export default function Galleri() {
                             tekst her ja.
                         </p>
                     </div>
-                    <ProjectScroller />
+                    <ErrorBoundary>
+                        <ProjectScroller />
+                    </ErrorBoundary>
                 </div>
             </div>
             <Socials />

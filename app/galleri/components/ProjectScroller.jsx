@@ -4,32 +4,30 @@ import { useRef, useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { SpinningLoader } from "@/app/components/SpinningLoader";
+import projectsData from "../../api/gallery/data/projects.json";
+import imagesData from "../../api/gallery/data/images.json";
 
 export const ProjectScroller = () => {
     const containerRef = useRef(null);
     const [scrollProgress, setScrollProgress] = useState(0);
     const [projects, setProjects] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     useEffect(() => {
-        fetch("/api/gallery/projects")
-            .then((res) => res.json())
-            .then((data) => {
-                if (data.success && Array.isArray(data.data)) {
-                    setProjects(data.data);
-                } else {
-                    console.error(
-                        "Expected array from /api/gallery/projects, got:",
-                        data
-                    );
-                    setProjects([]);
-                }
-            })
-            .catch((err) => {
-                console.error("Failed to fetch projects:", err);
-                setProjects([]);
-            })
-            .finally(() => setLoading(false));
+        try {
+            const enrichedProjects = projectsData.projects.map((project) => ({
+                ...project,
+                images: project.imageIds
+                    .map((imageId) =>
+                        imagesData.images.find((img) => img.id === imageId)
+                    )
+                    .filter(Boolean),
+            }));
+            setProjects(enrichedProjects);
+        } catch (err) {
+            console.error("Failed to process projects:", err);
+            setError("Kunne ikke laste prosjekter.");
+        }
     }, []);
 
     useEffect(() => {
@@ -48,10 +46,10 @@ export const ProjectScroller = () => {
         }
     }, []);
 
-    if (loading) {
+    if (error) {
         return (
-            <div className="h-screen grid place-items-center">
-                <SpinningLoader />
+            <div className="text-primary-light text-center p-4">
+                <p>{error}</p>
             </div>
         );
     }
@@ -72,13 +70,19 @@ export const ProjectScroller = () => {
                                 <Image
                                     className="h-36 w-72 lg:w-[540px] lg:h-[270px] object-cover border-4 border-primary-light rounded-tr-4xl"
                                     src={project.images[0].url}
-                                    alt={project.title}
-                                    width={288}
-                                    height={144}
+                                    alt={project.title || "Prosjektbilde"}
+                                    width={540}
+                                    height={270}
+                                    onError={(e) => {
+                                        console.error(
+                                            `Failed to load image: ${project.images[0].url}`
+                                        );
+                                        e.target.src = "/images/fallback.jpg";
+                                    }}
                                 />
                             ) : (
                                 <div className="h-36 w-72 lg:w-[540px] lg:h-[270px] bg-primary-dark border-4 border-primary-light rounded-tr-4xl flex items-center justify-center text-sm">
-                                    No Gallery Images
+                                    Ingen bilder
                                 </div>
                             )}
                             <h3 className="text-2xl mt-2 sm:text-3xl font-extralight">
@@ -99,7 +103,7 @@ export const ProjectScroller = () => {
                     ))
                 ) : (
                     <div className="text-center text-primary-light w-full">
-                        No projects available
+                        Ingen prosjekter tilgjengelig
                     </div>
                 )}
             </div>

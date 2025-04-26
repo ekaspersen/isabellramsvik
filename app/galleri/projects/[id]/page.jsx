@@ -1,33 +1,40 @@
-// app/galleri/[id]/page.jsx
+// app/galleri/project/[id]/page.jsx
 "use client";
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { ProjectScroller } from "../components/ProjectScroller";
-import { SpinningLoader } from "@/app/components/SpinningLoader";
+import { ProjectScroller } from "../../components/ProjectScroller";
+import projectsData from "../../../api/gallery/data/projects.json";
+import imagesData from "../../../api/gallery/data/images.json";
 
 export default function ProjectPage() {
     const { id } = useParams();
     const [project, setProject] = useState(null);
     const [selectedImage, setSelectedImage] = useState(null);
-    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     useEffect(() => {
-        if (id) {
-            setLoading(true);
-            fetch(`/api/gallery/projects/${id}`)
-                .then((res) => res.json())
-                .then((data) => {
-                    if (data.success) {
-                        setProject(data.data);
-                    } else {
-                        console.error("Failed to fetch project:", data.error);
-                    }
-                })
-                .catch((err) => console.error("Failed to fetch project:", err))
-                .finally(() => setLoading(false));
+        try {
+            const foundProject = projectsData.projects.find(
+                (proj) => proj.id === parseInt(id)
+            );
+            if (!foundProject) {
+                throw new Error("Prosjekt ikke funnet");
+            }
+            const projectWithImages = {
+                ...foundProject,
+                images: foundProject.imageIds
+                    .map((imageId) =>
+                        imagesData.images.find((img) => img.id === imageId)
+                    )
+                    .filter(Boolean),
+            };
+            setProject(projectWithImages);
+        } catch (err) {
+            console.error("Failed to process project:", err);
+            setError(err.message || "Kunne ikke laste prosjekt.");
         }
     }, [id]);
 
@@ -35,10 +42,18 @@ export default function ProjectPage() {
         setSelectedImage(image);
     };
 
-    if (loading || !project) {
+    if (error) {
         return (
             <div className="h-screen grid place-items-center bg-black pb-128">
-                <SpinningLoader />
+                <p className="text-primary-light">{error}</p>
+            </div>
+        );
+    }
+
+    if (!project) {
+        return (
+            <div className="h-screen grid place-items-center bg-black pb-128">
+                <p className="text-primary-light">Laster...</p>
             </div>
         );
     }
@@ -78,10 +93,16 @@ export default function ProjectPage() {
                                 width={1200}
                                 height={600}
                                 className="w-full max-w-fit lg:w-1/2 max-h-[480px] object-contain rounded-lg border-4 border-primary-light"
+                                onError={(e) => {
+                                    console.error(
+                                        `Failed to load image: ${displayImage.url}`
+                                    );
+                                    e.target.src = "/images/fallback.jpg";
+                                }}
                             />
                         ) : (
                             <div className="w-full max-w-fit lg:w-1/2 max-h-[480px] bg-primary-dark rounded-lg border-4 border-primary-light flex items-center justify-center text-sm">
-                                No Images
+                                Ingen bilder
                             </div>
                         )}
                         <motion.div
@@ -132,6 +153,12 @@ export default function ProjectPage() {
                                     width={200}
                                     height={200}
                                     className="w-full h-32 object-cover rounded border-2 border-primary-light hover:border-white"
+                                    onError={(e) => {
+                                        console.error(
+                                            `Failed to load image: ${image.url}`
+                                        );
+                                        e.target.src = "/images/fallback.jpg";
+                                    }}
                                 />
                             </motion.div>
                         ))}
@@ -159,6 +186,13 @@ export default function ProjectPage() {
                                         width={800}
                                         height={400}
                                         className="w-full max-h-[480px] object-contain max-w-fit rounded-lg border-4 border-primary-light"
+                                        onError={(e) => {
+                                            console.error(
+                                                `Failed to load image: ${selectedImage.url}`
+                                            );
+                                            e.target.src =
+                                                "/images/fallback.jpg";
+                                        }}
                                     />
                                     <h3 className="text-2xl font-light mb-[-8px]">
                                         {selectedImage.title}
