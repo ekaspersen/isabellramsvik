@@ -79,7 +79,7 @@ export default function SkreddersyddMaleriForm() {
         >
             <div className="inner flex flex-col gap-12 text-center">
                 <div className="flex flex-col">
-                    <h1 className="text-4xl sm:text-6xl font-extralight text-clr-primary-light mb-4">
+                    <h1 className="text-5xl sm:text-6xl font-extralight text-clr-primary-light mb-4">
                         Skreddersydd Maleri
                     </h1>
                     <p className="italic text-center sm:text-xl text-primary-light">

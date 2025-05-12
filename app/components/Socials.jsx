@@ -6,7 +6,7 @@ export default function Socials() {
     return (
         <div id="kontakt" className="inner w-full">
             <div className="bg-black border-2 border-primary-light flex flex-col gap-8 items-center py-16 w-full">
-                <h2 className="text-4xl sm:text-6xl font-extralight">
+                <h2 className="text-5xl sm:text-6xl font-extralight">
                     Sosiale Medier
                 </h2>
                 <div className="border-b-2 border-primary-light w-3xl max-w-4/5"></div>

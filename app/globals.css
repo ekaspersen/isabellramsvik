@@ -8,8 +8,13 @@
     --color-primary-dark: #584f3e;
     --color-white: #f9f7ee;
     --color-black: #1e1e1e;
+    /* transparent ones */
+    --color-black-transparent: #1e1e1e80;
     /*Custom Breakpoints*/
     --breakpoint-xs: 480px;
+}
+.someclass {
+    color: #1e1e1ebb;
 }
 
 :root {
