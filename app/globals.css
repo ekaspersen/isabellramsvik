@@ -8,8 +8,13 @@
     --color-primary-dark: #584f3e;
     --color-white: #f9f7ee;
     --color-black: #1e1e1e;
+    /* transparent ones */
+    --color-black-transparent: #1e1e1e80;
     /*Custom Breakpoints*/
     --breakpoint-xs: 480px;
+}
+.someclass {
+    color: #1e1e1ebb;
 }
 
 :root {
@@ -22,12 +27,64 @@ html {
     font-size: 1rem;
     line-height: 1.5;
     color: var(--color-white);
-    background-color: var(--color-primary-dark);
+    background-color: var(--color-black);
 }
 
 /* Example container class */
 .inner {
     @apply w-full max-w-[1200px] px-4 mx-auto;
+}
+
+/* Universal fade-up animation utilities */
+.page-fade-up {
+  opacity: 0;
+  transform: translateY(32px);
+  animation: fadeUpPage 0.8s cubic-bezier(0.4,0,0.2,1) forwards;
+}
+@keyframes fadeUpPage {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Image fade-in animation and spinner overlay logic */
+.image-fade-in {
+  opacity: 0;
+  animation: imageFadeIn 0.7s cubic-bezier(0.4,0,0.2,1) forwards;
+}
+@keyframes imageFadeIn {
+  to {
+    opacity: 1;
+  }
+}
+.spinner-overlay {
+  transition: opacity 0.3s;
+}
+/* Hide spinner when image is visible (after fade-in) */
+.image-fade-in[style*="opacity: 1"] ~ .spinner-overlay {
+  opacity: 0;
+  pointer-events: none;
+}
+.fade-up {
+  opacity: 0;
+  transform: translateY(32px);
+  animation: fadeUp 0.7s cubic-bezier(0.4,0,0.2,1) forwards;
+}
+.fade-up-fast {
+  animation-duration: 0.4s;
+}
+.fade-up-slow {
+  animation-duration: 1.2s;
+}
+.fade-up-delay {
+  animation-delay: 0.4s;
+}
+@keyframes fadeUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Custom button style class using generated theme utilities */

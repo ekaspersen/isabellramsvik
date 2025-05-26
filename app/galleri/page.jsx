@@ -1,16 +1,16 @@
 // app/galleri/page.jsx
 "use client";
 import { ProjectScroller } from "./components/ProjectScroller";
-import Socials from "../components/Socials";
-import SkreddersyddMaleriForm from "../components/sections/Skreddersyddmaleriform";
 import { ResponsiveImageGrid } from "./components/ResponsiveImageGrid";
+import Socials from "../components/Socials";
+import SkreddersyddMaleriForm from "../components/sections/SkreddersyddMaleriForm";
 
 export default function Galleri() {
     return (
-        <div className="bg-black py-24 flex flex-col gap-24">
+        <div className="bg-black py-24 flex flex-col gap-24 page-fade-up">
             <div className="inner flex flex-col gap-24">
                 <div className="border-b-2 border-primary-light pb-8 flex flex-col items-center text-center gap-8">
-                    <h1 className="text-5xl sm:text-8xl font-extralight">
+                    <h1 className="text-7xl sm:text-8xl font-extralight">
                         Galleri
                     </h1>
                     <p className="text-sm sm:text-base max-w-2xl">

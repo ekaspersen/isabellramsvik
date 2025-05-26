@@ -3,17 +3,24 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import imagesData from "../../api/gallery/data/images.json";
 
 export const ResponsiveImageGrid = () => {
     const [images, setImages] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [imagesPerPage, setImagesPerPage] = useState(6);
+    const [error, setError] = useState(null);
 
     useEffect(() => {
-        fetch("/api/images")
-            .then((res) => res.json())
-            .then((data) => setImages(data))
-            .catch((err) => console.error("Failed to load images:", err));
+        try {
+            const galleryImages = imagesData.images.filter(
+                (img) => img.displayInGallery
+            );
+            setImages(galleryImages);
+        } catch (err) {
+            console.error("Failed to process images:", err);
+            setError("Kunne ikke laste bilder.");
+        }
     }, []);
 
     useEffect(() => {
@@ -31,6 +38,14 @@ export const ResponsiveImageGrid = () => {
         window.addEventListener("resize", updateImagesPerPage);
         return () => window.removeEventListener("resize", updateImagesPerPage);
     }, []);
+
+    if (error) {
+        return (
+            <div className="text-primary-light text-center p-4">
+                <p>{error}</p>
+            </div>
+        );
+    }
 
     const totalPages = Math.ceil(images.length / imagesPerPage);
 
@@ -115,25 +130,39 @@ export const ResponsiveImageGrid = () => {
 
             {/* Grid with Overlay */}
             <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 gap-2 w-full p-2 bg-primary-light">
-                {visibleImages.map((image) => (
-                    <div
-                        key={image.id}
-                        className="w-full aspect-square relative group"
-                    >
-                        <Image
-                            src={image.url}
-                            alt={image.title || "Bilde"}
-                            className="object-cover w-full h-full"
-                            fill
-                            sizes="100vw"
-                        />
-                        <Link href={`/galleri/images/${image.id}`}>
-                            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                <button className="btn-golden">Se mer</button>
-                            </div>
-                        </Link>
+                {images.length > 0 ? (
+                    visibleImages.map((image) => (
+                        <div
+                            key={image.id}
+                            className="w-full aspect-square relative group"
+                        >
+                            <Image
+                                src={image.url}
+                                alt={image.title || "Bilde"}
+                                className="object-cover w-full h-full"
+                                fill
+                                sizes="(max-width: 480px) 100vw, (max-width: 640px) 50vw, 33vw"
+                                onError={(e) => {
+                                    console.error(
+                                        `Failed to load image: ${image.url}`
+                                    );
+                                    e.target.src = "/images/fallback.jpg";
+                                }}
+                            />
+                            <Link href={`/galleri/images/${image.id}`}>
+                                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                    <button className="btn-golden">
+                                        Se mer
+                                    </button>
+                                </div>
+                            </Link>
+                        </div>
+                    ))
+                ) : (
+                    <div className="col-span-3 text-center text-primary-light">
+                        Ingen bilder tilgjengelig
                     </div>
-                ))}
+                )}
             </div>
 
             {/* Desktop Pagination */}

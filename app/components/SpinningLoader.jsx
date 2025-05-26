@@ -1,26 +1,25 @@
 // app/components/SpinningLoader.jsx - please use for all loading
-import { motion } from "framer-motion";
+import React from "react";
 
 export const SpinningLoader = () => {
     return (
-        <motion.div
-            style={{
-                width: "50px",
-                height: "50px",
-                border: "5px solid #584f3e",
-                borderTop: "5px solid #c1a061",
-                borderRadius: "50%",
-                display: "inline-block",
-                margin: "auto",
-            }}
-            animate={{
-                rotate: 360,
-            }}
-            transition={{
-                repeat: Infinity,
-                duration: 1,
-                ease: "linear",
-            }}
+        <div
+            className="w-[50px] h-[50px] border-[5px] border-[#584f3e] border-t-[#c1a061] rounded-full inline-block m-auto infinite animate-spin"
         />
     );
 };
+
+/*
+Add this to your global CSS (e.g. styles/globals.css or app/globals.css):
+
+@layer utilities {
+  .animate-spin-custom {
+    animation: spin-custom 1s linear infinite;
+  }
+  @keyframes spin-custom {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+}
+*/
