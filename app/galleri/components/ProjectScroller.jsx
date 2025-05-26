@@ -3,9 +3,8 @@
 import { useRef, useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { SpinningLoader } from "@/app/components/SpinningLoader";
-import projectsData from "../../api/gallery/data/projects.json";
-import imagesData from "../../api/gallery/data/images.json";
+import projectsData from "@/app/api/gallery/data/projects.json";
+import imagesData from "@/app/api/gallery/data/images.json";
 
 export const ProjectScroller = () => {
     const containerRef = useRef(null);

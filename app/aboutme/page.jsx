@@ -3,12 +3,12 @@ import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 import Socials from "../components/Socials";
-import SkreddersyddMaleriForm from "../components/sections/Skreddersyddmaleriform";
+import SkreddersyddMaleriForm from "../components/sections/SkreddersyddMaleriForm";
 
 export default function Aboutme() {
     return (
         <>
-            <div className="inner flex flex-col md:gap-8 py-32">
+            <div className="inner flex flex-col md:gap-8 py-32 page-fade-up">
                 <div className="flex flex-col gap-8 md:mb-8">
                     <h2 className="text-6xl font-extralight">Om meg</h2>
                     <div className="border-b-2 border-primary-light w-full"></div>
@@ -57,7 +57,7 @@ export default function Aboutme() {
                             height={347}
                         />
                     </div>
-                    <div className="flex-1 flex flex-col gap-6 pt-6 md:pt-0 max-w-2xl">
+                    <div className="flex-1 flex flex-col gap-6 pt-6 md:pt-0 max-w-2xl ">
                         <p className="">
                             Jeg kombinerer realistiske teknikker med
                             fantasifulle landskap, fordyper meg i portrettkunst
@@ -81,8 +81,8 @@ export default function Aboutme() {
                         </p>
                     </div>
                 </div>
-                <div className="flex flex-col gap-6 pt-6 md:pt-0">
-                    <p className="max-w-xl">
+                <div className="flex flex-col gap-6 pt-6 md:pt-0 text-sm sm:text-base md:text-sm lg:text-base">
+                    <p className="max-w-lg">
                         Kunst for meg er både personlig og visjonært. Jeg er en
                         kunstner med store ideer – alltid med en bok full av
                         konsepter og prosjekter som venter på å bli realisert.
@@ -90,7 +90,7 @@ export default function Aboutme() {
                         verden, ofte preget av følelser som ikke alltid er lett
                         å sette ord på.
                     </p>
-                    <p className="font-bold max-w-xl">
+                    <p className="font-bold max-w-lg">
                         Uansett om jeg jobber med et portrett, et landskap,
                         eller abstrakte komposisjoner, søker jeg alltid å skape
                         en dyp forbindelse mellom kunsten og betrakteren.

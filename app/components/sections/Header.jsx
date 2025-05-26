@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import React, { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+
 
 function Header() {
     const [isOpen, setIsOpen] = useState(false);
@@ -52,47 +52,37 @@ function Header() {
                 >
                     <div className="h-1 w-full bg-primary-light rounded" />
                     <div className="h-1 w-full bg-primary-light rounded" />
-                    <motion.div
-                        className="h-1 bg-primary-light rounded"
-                        animate={{
-                            width: "75%",
-                            marginLeft: isOpen ? "0%" : "auto",
-                        }}
-                        transition={{ duration: 0.3 }}
+                    <div
+                        className={`h-1 bg-primary-light rounded transition-all duration-300 ${isOpen ? 'w-[75%] ml-0' : 'w-[75%] ml-auto'}`}
                     />
                 </div>
             </div>
 
             {/* Mobile Nav */}
-            <AnimatePresence>
-                {isOpen && (
-                    <motion.nav
-                        initial={{ opacity: 0, x: 0, y: -50 }}
-                        animate={{ opacity: 1, x: 0, y: 0 }}
-                        exit={{ opacity: 0, x: 0, y: -50 }}
-                        transition={{ duration: 0.3 }}
-                        className="fixed top-[90px] left-0 right-0 bg-black shadow-lg pb-16 pt-8 flex flex-col items-center gap-16 text-white text-lg font-medium md:hidden z-40"
-                    >
-                        {navLinks.map(({ href, label, isButton }) => (
-                            <Link
-                                href={href}
-                                key={label}
-                                onClick={() => setIsOpen(false)}
+            {isOpen && (
+                <nav
+                    className="fixed top-[90px] left-0 right-0 bg-black shadow-lg pb-16 pt-8 flex flex-col items-center gap-16 text-white text-lg font-medium md:hidden z-40 transition-all duration-300 transform animate-slide-down"
+                >
+                    {navLinks.map(({ href, label, isButton }) => (
+                        <Link
+                            href={href}
+                            key={label}
+                            onClick={() => setIsOpen(false)}
+                        >
+                            <span
+                                className={`hover:text-primary-light text-xl transition-all ${
+                                    isButton
+                                        ? "btn-golden inline-block"
+                                        : ""
+                                }`}
                             >
-                                <span
-                                    className={`hover:text-primary-light text-xl transition-all ${
-                                        isButton
-                                            ? "btn-golden inline-block"
-                                            : ""
-                                    }`}
-                                >
-                                    {label}
-                                </span>
-                            </Link>
-                        ))}
-                    </motion.nav>
-                )}
-            </AnimatePresence>
+                                {label}
+                            </span>
+                        </Link>
+                    ))}
+                </nav>
+            )}
+
         </header>
     );
 }

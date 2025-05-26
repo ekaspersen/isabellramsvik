@@ -3,11 +3,11 @@ import React from "react";
 import HomeHerobanner from "./components/sections/HomeHerobanner";
 import HomeAboutMe from "./components/sections/HomeAboutMe";
 import Socials from "./components/Socials";
-import SkreddersyddMaleriForm from "./components/sections/Skreddersyddmaleriform";
+import SkreddersyddMaleriForm from "./components/sections/SkreddersyddMaleriForm";
 
 const Home = () => {
     return (
-        <div>
+        <div className="page-fade-up">
             <HomeHerobanner />
             <HomeAboutMe />
             <Socials id="kontakt" />
